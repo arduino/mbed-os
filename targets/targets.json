@@ -5783,6 +5783,19 @@
             "CONFIG_GPIO_AS_PINRESET"
         ]
     },
+    "ARDUINO_EDGE_CONTROL": {
+        "inherits": ["MCU_NRF52840"],
+        "features_add": ["STORAGE"],
+        "device_has_remove": ["ITM"],
+        "device_has_add": ["WATCHDOG"],
+        "components_add": [
+            "SD",
+            "SPIF"
+        ],
+        "macros_add": [
+            "CONFIG_GPIO_AS_PINRESET"
+        ]
+    },
     "NUMAKER_PFM_NUC472": {
         "core": "Cortex-M4F",
         "components_add": [
