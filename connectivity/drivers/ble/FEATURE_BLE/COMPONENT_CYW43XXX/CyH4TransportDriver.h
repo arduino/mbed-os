@@ -24,7 +24,7 @@
 #include "ble/driver/CordioHCITransportDriver.h"
 #include "drivers/DigitalInOut.h"
 #include "drivers/InterruptIn.h"
-#include "cyhal_uart.h"
+#include "drivers/UnbufferedSerial.h"
 
 namespace ble {
 namespace vendor {
@@ -81,6 +81,7 @@ public:
 private:
     void assert_bt_dev_wake();
     void deassert_bt_dev_wake();
+    void on_controller_irq();
 
     // Use HAL serial because Cypress UART is buffered.
     // The PUTC function does not actually blocks until data is fully transmitted,
@@ -89,8 +90,7 @@ private:
     // However UART APIs does not prevent the BT radio from going to sleep.
     // Use the HAL APIs to prevent the radio from going to sleep until UART transmition is complete.
     // Mbed layer has no API that distinguish between data in HW buffer v.s. data already transmitted.
-
-    cyhal_uart_t uart;
+    mbed::UnbufferedSerial uart;
     PinName cts;
     PinName rts;
     PinName tx;

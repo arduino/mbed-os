@@ -3162,7 +3162,14 @@
         ],
         "detect_code": ["0813"],
         "components_add": [
-            "QSPIF"
+            "QSPIF",
+            "CYW43XXX"
+        ],
+        "extra_labels_add": [
+            "CORDIO"
+        ],
+        "features": [
+            "BLE"
         ],
         "device_has_add": [
             "USBDEVICE",
