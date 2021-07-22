@@ -36,11 +36,17 @@
 #define WIFI_DEFAULT_PARTITION 1
 #define WIFI_DEFAULT_FS 0
 
-QSPIFBlockDevice *qspi_bd = NULL;
+BlockDevice      *qspi_bd = NULL;
 MBRBlockDevice   *mbr_bd = NULL;
 FATFileSystem    *wifi_fs = NULL;
 
 wiced_filesystem_t resource_fs_handle;
+
+MBED_WEAK BlockDevice *BlockDevice::get_default_instance()
+{
+    static QSPIFBlockDevice default_bd(PD_11, PD_12, PF_7, PD_13,  PF_10, PG_6, QSPIF_POLARITY_MODE_1, 40000000);
+    return &default_bd;
+}
 
 MBED_WEAK void wiced_filesystem_mount_error(void)
 {
@@ -134,7 +140,7 @@ wiced_result_t wiced_filesystem_init(void)
 {
     if (mbr_bd == NULL && wifi_fs == NULL) {
         WPRINT_WHD_DEBUG(("Initialize FileSystem with Mbed default settings\n\r"));
-        qspi_bd = new QSPIFBlockDevice(PD_11, PD_12, PF_7, PD_13,  PF_10, PG_6, QSPIF_POLARITY_MODE_1, 40000000);
+        qspi_bd = mbed::BlockDevice::get_default_instance();
 
         if (qspi_bd->init() == BD_ERROR_OK) {
             mbr_bd = new MBRBlockDevice(qspi_bd, WIFI_DEFAULT_PARTITION);
