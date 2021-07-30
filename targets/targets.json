@@ -8600,6 +8600,7 @@
             "SERIAL",
             "SERIAL_FC",
             "SPI",
+            "RTC",
             "USTICKER",
             "WATCHDOG",
             "USBDEVICE",
