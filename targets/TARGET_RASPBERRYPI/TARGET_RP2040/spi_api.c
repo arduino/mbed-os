@@ -26,8 +26,10 @@ void spi_init(spi_t *obj, PinName mosi, PinName miso, PinName sclk, PinName ssel
     SPIName spi_sclk = (SPIName)pinmap_peripheral(sclk, PinMap_SPI_SCLK);
     SPIName spi_ssel = (SPIName)pinmap_peripheral(ssel, PinMap_SPI_SSEL);
 
-    MBED_ASSERT(spi_mosi == spi_miso);
-    MBED_ASSERT(spi_miso == spi_sclk);
+    if (spi_miso != (SPIName)NC) {
+        MBED_ASSERT(spi_mosi == spi_miso);
+        MBED_ASSERT(spi_miso == spi_sclk);
+    }
     if (spi_ssel != (SPIName)NC) {
         MBED_ASSERT(spi_sclk == spi_ssel);
     }
