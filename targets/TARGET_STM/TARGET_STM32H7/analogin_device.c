@@ -32,6 +32,8 @@ void analogin_pll_configuration(void)
     }
 #endif /* DUAL_CORE */
 
+    core_util_critical_section_enter();
+
     RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
     PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_ADC;
     PeriphClkInitStruct.PLL2.PLL2M = 4;
@@ -46,6 +48,8 @@ void analogin_pll_configuration(void)
     if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK) {
         error("analogin_init HAL_RCCEx_PeriphCLKConfig");
     }
+
+    core_util_critical_section_exit();
 
 #if defined(DUAL_CORE)
     LL_HSEM_ReleaseLock(HSEM, CFG_HW_RCC_SEMID, HSEM_CR_COREID_CURRENT);
