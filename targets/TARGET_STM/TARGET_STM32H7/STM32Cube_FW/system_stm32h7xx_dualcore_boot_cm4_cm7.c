@@ -232,7 +232,7 @@ __weak void SystemInit (void)
   /* Configure the Vector Table location add offset address ------------------*/
 #ifdef VECT_TAB_SRAM
   SCB->VTOR = D2_AXISRAM_BASE | VECT_TAB_OFFSET; /* Vector Table Relocation in Internal SRAM */
-#else
+#elif !defined(NO_VTOR_RELOCATE)
 #include "nvic_addr.h"                   // MBED
   SCB->VTOR = NVIC_FLASH_VECTOR_ADDRESS; // MBED
 #endif
