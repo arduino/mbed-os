@@ -6249,6 +6249,7 @@
         "device_name": "nRF52832_xxAA",
         "macros_add": [
             "CONFIG_GPIO_AS_PINRESET",
+            "CONFIG_NFCT_PINS_AS_GPIOS",
             "NRF52_PAN_12",
             "NRF52_PAN_15",
             "NRF52_PAN_20",
