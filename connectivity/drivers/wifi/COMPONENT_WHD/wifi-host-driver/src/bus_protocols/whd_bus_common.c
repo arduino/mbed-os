@@ -179,7 +179,7 @@ static whd_result_t whd_bus_common_download_resource(whd_driver_t whd_driver, wh
             uint32_t tmp;
 
             /* verify reset instruction value */
-            result = whd_bus_read_backplane_value(whd_driver, 0, sizeof(tmp), (uint8_t *)&tmp);
+            result = whd_bus_read_backplane_value(whd_driver, 0, sizeof(tmp), (uint32_t *)&tmp);
 
             if ( (result == WHD_SUCCESS) && (tmp != reset_instr) )
             {
