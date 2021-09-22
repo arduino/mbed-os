@@ -355,7 +355,7 @@ typedef struct cmd_class_s {
     input_passthrough_func_t passthrough_fnc; // input passthrough cb function
 } cmd_class_t;
 
-cmd_class_t cmd = {
+static cmd_class_t cmd = {
     .init = false,
     .cmd_ptr = NULL,
     .mutex_wait_fnc = NULL,
