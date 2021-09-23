@@ -607,7 +607,7 @@ spif_bd_error SPIFBlockDevice::_spi_send_general_command(int instruction, bd_add
 /*********************************************************/
 /********** SFDP Parsing and Detection Functions *********/
 /*********************************************************/
-int SPIFBlockDevice::_sfdp_parse_basic_param_table(Callback<int(bd_addr_t, mbed::sfdp_cmd_addr_size_t, uint8_t, uint8_t, void *, bd_size_t)> sfdp_reader,
+int SPIFBlockDevice::_sfdp_parse_basic_param_table(Callback<int(mbed::bd_addr_t, mbed::sfdp_cmd_addr_size_t, uint8_t, uint8_t, void *, mbed::bd_size_t)> sfdp_reader,
                                                    sfdp_hdr_info &sfdp_info)
 {
     uint8_t param_table[SFDP_BASIC_PARAMS_TBL_SIZE]; /* Up To 20 DWORDS = 80 Bytes */

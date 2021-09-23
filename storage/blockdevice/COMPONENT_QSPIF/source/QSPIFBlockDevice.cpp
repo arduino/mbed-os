@@ -617,7 +617,7 @@ int QSPIFBlockDevice::remove_csel_instance(PinName csel)
 /*********************************************************/
 /********** SFDP Parsing and Detection Functions *********/
 /*********************************************************/
-int QSPIFBlockDevice::_sfdp_parse_basic_param_table(Callback<int(bd_addr_t, mbed::sfdp_cmd_addr_size_t, uint8_t, uint8_t, void *, bd_size_t)> sfdp_reader,
+int QSPIFBlockDevice::_sfdp_parse_basic_param_table(Callback<int(mbed::bd_addr_t, mbed::sfdp_cmd_addr_size_t, uint8_t, uint8_t, void *, bd_size_t)> sfdp_reader,
                                                     sfdp_hdr_info &sfdp_info)
 {
     uint8_t param_table[SFDP_BASIC_PARAMS_TBL_SIZE]; /* Up To 20 DWORDS = 80 Bytes */
