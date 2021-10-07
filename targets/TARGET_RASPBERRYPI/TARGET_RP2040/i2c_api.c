@@ -24,6 +24,8 @@
 #define WriteGeneral   2 // the master is writing to all slave
 #define WriteAddressed 3 // the master is writing to this slave (slave = receiver)
 
+#define BYTE_TIMEOUT_US   ((SystemCoreClock / obj->baudrate) * 3 * 10)
+
 /******************************************************************************
  * CONST
  ******************************************************************************/
@@ -193,7 +195,18 @@ int i2c_slave_receive(i2c_t *obj)
  */
 int i2c_slave_read(i2c_t *obj, char *data, int length)
 {
-    size_t read_len = i2c_read_raw_blocking(obj->dev, (uint8_t *)data, length);
+    int read_len = 0;
+
+    int timeout = 120 * (length + 1);
+    while (!i2c_get_read_available(obj->dev)) {
+        tight_loop_contents();
+    }
+    while (--timeout != 0) {
+        if (i2c_get_read_available(obj->dev)) {
+            data[read_len++] = i2c_get_hw(obj->dev)->data_cmd;
+        }
+        wait_us(1);
+    }
 
     DEBUG_PRINTF("i2c_slave read %d bytes\r\n", read_len);
 
