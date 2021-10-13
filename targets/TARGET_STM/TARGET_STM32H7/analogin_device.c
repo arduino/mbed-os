@@ -89,7 +89,7 @@ void analogin_init(analogin_t *obj, PinName pin)
 
     // Configure ADC object structures
     obj->handle.State = HAL_ADC_STATE_RESET;
-    obj->handle.Init.ClockPrescaler           = ADC_CLOCK_ASYNC_DIV4;
+    obj->handle.Init.ClockPrescaler           = ADC_CLOCK_SYNC_PCLK_DIV4;
     obj->handle.Init.Resolution               = ADC_RESOLUTION_16B;
     obj->handle.Init.ScanConvMode             = ADC_SCAN_DISABLE;
     obj->handle.Init.EOCSelection             = ADC_EOC_SINGLE_CONV;
