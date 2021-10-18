@@ -1092,8 +1092,10 @@ int QSPIFBlockDevice::_handle_vendor_quirks()
             // 2. Require setting a "fast mode" bit in config register 2 to operate at higher clock rates
             // 3. Should never attempt to enable 4-byte addressing (it causes reads and writes to fail)
             tr_debug("Applying quirks for macronix");
-            _needs_fast_mode = true;
-            _num_status_registers = 3;
+            if (vendor_device_ids[1] != 0x20) {
+                _needs_fast_mode = true;
+                _num_status_registers = 3;
+            }
             _read_status_reg_2_inst = QSPIF_INST_RDCR;
             _attempt_4_byte_addressing = false;
             break;
