@@ -3629,6 +3629,57 @@
             "i2c_timing_value_algo": true
         }
     },
+    "OPTA": {
+        "inherits": ["MCU_STM32H747xI_CM7"],
+        "config": {
+            "hse_value": {
+                "help": "HSE default value is 25MHz in HAL",
+                "value": "25000000",
+                "macro_name": "HSE_VALUE"
+            },
+            "lse_bypass": {
+                "help": "1 to use an oscillator (not a crystal) on 32k LSE",
+                "value": "1"
+            },
+            "usb_speed": {
+                "help": "USE_USB_OTG_FS or USE_USB_OTG_HS or USE_USB_HS_IN_FS",
+                "value": "USE_USB_OTG_FS"
+            }
+        },
+        "overrides": {
+            "system_power_supply": "PWR_SMPS_1V8_SUPPLIES_LDO",
+            "clock_source": "USE_PLL_HSE_EXTC",
+            "lse_available": 1,
+            "lpticker_delay_ticks": 0,
+            "network-default-interface-type": "ETHERNET",
+            "i2c_timing_value_algo": true
+        },
+        "macros_add": [
+            "MBEDTLS_FS_IO",
+            "MBEDTLS_SHA1_C",
+            "CM4_BOOT_BY_APPLICATION",
+            "QSPI_NO_SAMPLE_SHIFT",
+            "CYW43XXX_UNBUFFERED_UART"
+        ],
+        "device_has_add": [
+            "USBDEVICE",
+            "EMAC",
+            "QSPI"
+        ],
+        "extra_labels_add": [
+            "CORDIO"
+        ],
+        "features": [
+            "BLE"
+        ],
+        "components_add": [
+            "QSPIF",
+            "WHD",
+            "4343W_FS",
+            "CYW43XXX"
+        ],
+        "device_name": "STM32H747XIHx"
+    },
     "MCU_STM32H750xB": {
         "inherits": [
             "MCU_STM32H7"
