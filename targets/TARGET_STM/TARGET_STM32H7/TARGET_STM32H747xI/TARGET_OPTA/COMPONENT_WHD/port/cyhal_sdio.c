@@ -92,7 +92,7 @@ static cy_rslt_t sdio_enable_high_speed(void)
 
     sdio_init_structure.ClockDiv       = SDMMC_HSpeed_CLK_DIV;
     sdio_init_structure.ClockEdge      = SDMMC_CLOCK_EDGE_RISING;
-    sdio_init_structure.ClockPowerSave = SDMMC_CLOCK_POWER_SAVE_DISABLE;
+    sdio_init_structure.ClockPowerSave = SDMMC_CLOCK_POWER_SAVE_ENABLE;
     sdio_init_structure.BusWide        = SDMMC_BUS_WIDE_4B;
     sdio_init_structure.HardwareFlowControl = SDMMC_HARDWARE_FLOW_CONTROL_ENABLE;
 
