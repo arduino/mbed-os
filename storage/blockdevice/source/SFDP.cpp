@@ -145,6 +145,9 @@ int sfdp_parse_single_param_header(sfdp_prm_hdr *phdr_ptr, sfdp_hdr_info &hdr_in
             case 0x06:
                 tr_info("UNSUPPORTED:Parameter header: eXtended Serial Peripheral Interface (xSPI) Profile 2.0");
                 break;
+            case 0x1F:
+                tr_info("Adesto header");
+                break;
             case 0x87:
                 tr_info("UNSUPPORTED:Parameter header: SCCR Map for SPI Memory Devices");
                 break;
