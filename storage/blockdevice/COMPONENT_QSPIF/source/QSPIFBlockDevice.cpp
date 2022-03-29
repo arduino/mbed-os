@@ -1186,6 +1186,11 @@ int QSPIFBlockDevice::_set_write_enable()
     uint8_t status_value = 0;
     int status = -1;
 
+    if (false == _is_mem_ready()) {
+        tr_error("Device not ready, set_write_enable failed");
+        return -1;
+    }
+
     do {
         if (QSPI_STATUS_OK !=  _qspi_send_general_command(QSPIF_INST_WREN, QSPI_NO_ADDRESS_COMMAND, NULL, 0, NULL, 0)) {
             tr_error("Sending WREN command FAILED");
