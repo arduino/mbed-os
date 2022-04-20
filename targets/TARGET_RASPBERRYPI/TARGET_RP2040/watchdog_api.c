@@ -41,6 +41,7 @@ uint32_t hal_watchdog_get_reload_value(void)
             load_value = 0xffffffu;
         }
     }
+    load_value = load_value / 1000 / 2;
     return load_value;
 }
 
