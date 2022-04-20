@@ -1,5 +1,5 @@
 if (NOT TARGET pico_standard_link)
-    add_library(pico_standard_link INTERFACE)
+    pico_add_impl_library(pico_standard_link)
 
     target_sources(pico_standard_link INTERFACE
         ${CMAKE_CURRENT_LIST_DIR}/crt0.S
@@ -14,7 +14,7 @@ if (NOT TARGET pico_standard_link)
         target_link_options(pico_standard_link INTERFACE "LINKER:-nostdlib")
     endif ()
 
-    target_link_libraries(pico_standard_link INTERFACE hardware_regs pico_bootrom pico_binary_info pico_cxx_options)
+    target_link_libraries(pico_standard_link INTERFACE hardware_regs boot_stage2_headers pico_bootrom pico_binary_info pico_cxx_options)
 
     function(pico_add_link_depend TARGET dependency)
         get_target_property(target_type ${TARGET} TYPE)
@@ -79,11 +79,15 @@ if (NOT TARGET pico_standard_link)
     # boot_stage2 will be linked if PICO_NO_FLASH would be defined to 0
     target_link_libraries(pico_standard_link INTERFACE $<$<NOT:$<IF:$<STREQUAL:$<TARGET_PROPERTY:PICO_TARGET_BINARY_TYPE>,no_flash>,1,$<AND:$<BOOL:${PICO_NO_FLASH}>,$<STREQUAL:,$<TARGET_PROPERTY:PICO_TARGET_BINARY_TYPE>>>>>:$<IF:$<BOOL:$<TARGET_PROPERTY:PICO_TARGET_BOOT_STAGE2>>,$<TARGET_PROPERTY:PICO_TARGET_BOOT_STAGE2>,bs2_default>_library>)
 
+    # PICO_CMAKE_CONFIG: PICO_USE_DEFAULT_MAX_PAGE_SIZE, Don't shrink linker max page to 4096, type=bool, default=0, advanced=true, group=pico_standard_link
+    if (NOT PICO_USE_DEFAULT_MAX_PAGE_SIZE)
+        target_link_options(pico_standard_link INTERFACE "LINKER:-z,max-page-size=4096")
+    endif()
     # done in compiler now
     #target_link_options(pico_standard_link INTERFACE "LINKER:--build-id=none")
 
     # this line occasionally useful for debugging ... todo maybe make a PICO_ var
-#    target_compile_options(pico_standard_link INTERFACE --save-temps) #debugging only
+    # target_compile_options(pico_standard_link INTERFACE --save-temps) #debugging only
 
     # PICO_CMAKE_CONFIG: PICO_NO_GC_SECTIONS, Disable -ffunction-sections -fdata-sections, and --gc-sections, type=bool, default=0, advanced=true, group=pico_standard_link
     if (NOT PICO_NO_GC_SECTIONS)

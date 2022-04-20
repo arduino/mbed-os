@@ -20,15 +20,16 @@
 
 #include "pico/mutex.h"
 #include "pico/time.h"
-// Use mbed printf
-//#include "pico/printf.h"
+
+#if LIB_PICO_PRINTF_PICO
+#include "pico/printf.h"
+#else
+#define weak_raw_printf printf
+#define weak_raw_vprintf vprintf
+#endif
 
 #if PICO_ENTER_USB_BOOT_ON_EXIT
 #include "pico/bootrom.h"
-#endif
-
-#ifndef PICO_NO_RAM_VECTOR_TABLE
-#define PICO_NO_RAM_VECTOR_TABLE 0
 #endif
 
 extern char __StackLimit; /* Set by linker.  */
@@ -53,7 +54,7 @@ void runtime_install_stack_guard(void *stack_bottom) {
     // mask is 1 bit per 32 bytes of the 256 byte range... clear the bit for the segment we want
     uint32_t subregion_select = 0xffu ^ (1u << ((addr >> 5u) & 7u));
     mpu_hw->ctrl = 5; // enable mpu with background default map
-    mpu_hw->rbar = (addr & ~0xff) | 0x8 | 0;
+    mpu_hw->rbar = (addr & (uint)~0xff) | 0x8 | 0;
     mpu_hw->rasr = 1 // enable region
                    | (0x7 << 1) // size 2^(7 + 1) = 256
                    | (subregion_select << 8)
@@ -64,10 +65,13 @@ void runtime_init(void) {
     // Reset all peripherals to put system into a known state,
     // - except for QSPI pads and the XIP IO bank, as this is fatal if running from flash
     // - and the PLLs, as this is fatal if clock muxing has not been reset on this boot
+    // - and USB, syscfg, as this disturbs USB-to-SWD on core 1
     reset_block(~(
             RESETS_RESET_IO_QSPI_BITS |
             RESETS_RESET_PADS_QSPI_BITS |
             RESETS_RESET_PLL_USB_BITS |
+            RESETS_RESET_USBCTRL_BITS |
+            RESETS_RESET_SYSCFG_BITS |
             RESETS_RESET_PLL_SYS_BITS
     ));
 
@@ -88,13 +92,13 @@ void runtime_init(void) {
 
     // Start and end points of the constructor list,
     // defined by the linker script.
-    extern void (*__preinit_array_start)();
-    extern void (*__preinit_array_end)();
+    extern void (*__preinit_array_start)(void);
+    extern void (*__preinit_array_end)(void);
 
     // Call each function in the list.
     // We have to take the address of the symbols, as __preinit_array_start *is*
     // the first function pointer, not the address of it.
-    for (void (**p)() = &__preinit_array_start; p < &__preinit_array_end; ++p) {
+    for (void (**p)(void) = &__preinit_array_start; p < &__preinit_array_end; ++p) {
         (*p)();
     }
 
@@ -111,23 +115,37 @@ void runtime_init(void) {
             hw_clear_alias(padsbank0_hw)->io[28] = hw_clear_alias(padsbank0_hw)->io[29] = PADS_BANK0_GPIO0_IE_BITS;
 #endif
 
-    extern mutex_t __mutex_array_start;
-    extern mutex_t __mutex_array_end;
+    // this is an array of either mutex_t or recursive_mutex_t (i.e. not necessarily the same size)
+    // however each starts with a lock_core_t, and the spin_lock is initialized to address 1 for a recursive
+    // spinlock and 0 for a regular one.
 
-    // the first function pointer, not the address of it.
-    for (mutex_t *m = &__mutex_array_start; m < &__mutex_array_end; m++) {
-        mutex_init(m);
+    static_assert(!(sizeof(mutex_t)&3), "");
+    static_assert(!(sizeof(recursive_mutex_t)&3), "");
+    static_assert(!offsetof(mutex_t, core), "");
+    static_assert(!offsetof(recursive_mutex_t, core), "");
+    extern lock_core_t __mutex_array_start;
+    extern lock_core_t __mutex_array_end;
+
+    for (lock_core_t *l = &__mutex_array_start; l < &__mutex_array_end; ) {
+        if (l->spin_lock) {
+            assert(1 == (uintptr_t)l->spin_lock); // indicator for a recursive mutex
+            recursive_mutex_t *rm = (recursive_mutex_t *)l;
+            recursive_mutex_init(rm);
+            l = &rm[1].core; // next
+        } else {
+            mutex_t *m = (mutex_t *)l;
+            mutex_init(m);
+            l = &m[1].core; // next
+        }
     }
 
 #if !(PICO_NO_RAM_VECTOR_TABLE || PICO_NO_FLASH)
     __builtin_memcpy(ram_vector_table, (uint32_t *) scb_hw->vtor, sizeof(ram_vector_table));
-    scb_hw->vtor = (intptr_t) ram_vector_table;
+    scb_hw->vtor = (uintptr_t) ram_vector_table;
 #endif
 
 #ifndef NDEBUG
-    uint32_t xpsr;
-    __asm volatile ("mrs %0, XPSR" : "=r" (xpsr)::);
-    if (xpsr & 0xffu) {
+    if (__get_current_exception()) {
         // crap; started in exception handler
         __asm ("bkpt #0");
     }
@@ -142,9 +160,22 @@ void runtime_init(void) {
     spin_locks_reset();
     irq_init_priorities();
     alarm_pool_init_default();
+
+    // Start and end points of the constructor list,
+    // defined by the linker script.
+    extern void (*__init_array_start)(void);
+    extern void (*__init_array_end)(void);
+
+    // Call each function in the list.
+    // We have to take the address of the symbols, as __init_array_start *is*
+    // the first function pointer, not the address of it.
+    for (void (**p)(void) = &__init_array_start; p < &__init_array_end; ++p) {
+        (*p)();
+    }
+
 }
 
-void __exit(int status) {
+void _exit(__unused int status) {
 #if PICO_ENTER_USB_BOOT_ON_EXIT
     reset_usb_boot(0,0);
 #else
@@ -154,7 +185,7 @@ void __exit(int status) {
 #endif
 }
 
-void *__sbrk(int incr) {
+void *_sbrk(int incr) {
     extern char end; /* Set by linker.  */
     static char *heap_end;
     char *prev_heap_end;
@@ -165,9 +196,9 @@ void *__sbrk(int incr) {
     prev_heap_end = heap_end;
     char *next_heap_end = heap_end + incr;
 
-    if (__builtin_expect(next_heap_end >= (&__StackLimit), false)) {
+    if (__builtin_expect(next_heap_end > (&__StackLimit), false)) {
 #if PICO_USE_OPTIMISTIC_SBRK
-        if (next_heap_end == &__StackLimit) {
+        if (heap_end == &__StackLimit) {
 //        errno = ENOMEM;
             return (char *) -1;
         }
@@ -183,18 +214,18 @@ void *__sbrk(int incr) {
 
 // exit is not useful... no desire to pull in __call_exitprocs
 void exit(int status) {
-    __exit(status);
+    _exit(status);
 }
 
 // incorrect warning from GCC 6
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsuggest-attribute=format"
 void __assert_func(const char *file, int line, const char *func, const char *failedexpr) {
-    printf("assertion \"%s\" failed: file \"%s\", line %d%s%s\n",
+    weak_raw_printf("assertion \"%s\" failed: file \"%s\", line %d%s%s\n",
            failedexpr, file, line, func ? ", function: " : "",
            func ? func : "");
 
-    exit(1);
+    _exit(1);
 }
 
 #pragma GCC diagnostic pop
@@ -203,16 +234,38 @@ void __attribute__((noreturn)) panic_unsupported() {
     panic("not supported");
 }
 
+// PICO_CONFIG: PICO_PANIC_FUNCTION, Name of a function to use in place of the stock panic function or empty string to simply breakpoint on panic, group=pico_runtime
+// note the default is not "panic" it is undefined
+#ifdef PICO_PANIC_FUNCTION
+#define PICO_PANIC_FUNCTION_EMPTY (__CONCAT(PICO_PANIC_FUNCTION, 1) == 1)
+#if !PICO_PANIC_FUNCTION_EMPTY
+extern void __attribute__((noreturn)) __printflike(1, 0) PICO_PANIC_FUNCTION(__unused const char *fmt, ...);
+#endif
+// Use a forwarding method here as it is a little simpler than renaming the symbol as it is used from assembler
+void __attribute__((naked, noreturn)) __printflike(1, 0) panic(__unused const char *fmt, ...) {
+    // if you get an undefined reference here, you didn't define your PICO_PANIC_FUNCTION!
+    __asm (
+            "push {lr}\n"
+#if !PICO_PANIC_FUNCTION_EMPTY
+            "bl " __XSTRING(PICO_PANIC_FUNCTION) "\n"
+#endif
+            "bkpt #0\n"
+            "1: b 1b\n" // loop for ever as we are no return
+        :
+        :
+        :
+    );
+}
+#else
 // todo consider making this try harder to output if we panic early
 //  right now, print mutex may be uninitialised (in which case it deadlocks - although after printing "PANIC")
 //  more importantly there may be no stdout/UART initialized yet
 // todo we may want to think about where we print panic messages to; writing to USB appears to work
 //  though it doesn't seem like we can expect it to... fine for now
-//
 void __attribute__((noreturn)) __printflike(1, 0) panic(const char *fmt, ...) {
     puts("\n*** PANIC ***\n");
     if (fmt) {
-#if PICO_PRINTF_NONE
+#if LIB_PICO_PRINTF_NONE
         puts(fmt);
 #else
         va_list args;
@@ -220,15 +273,16 @@ void __attribute__((noreturn)) __printflike(1, 0) panic(const char *fmt, ...) {
 #if PICO_PRINTF_ALWAYS_INCLUDED
         vprintf(fmt, args);
 #else
-        vprintf(fmt, args);
+        weak_raw_vprintf(fmt, args);
 #endif
         va_end(args);
         puts("\n");
 #endif
     }
 
-    exit(1);
+    _exit(1);
 }
+#endif
 
 void hard_assertion_failure(void) {
     panic("Hard assert");

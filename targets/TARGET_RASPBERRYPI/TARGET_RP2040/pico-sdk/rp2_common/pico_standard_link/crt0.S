@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
+#include "pico.h"
 #include "hardware/regs/m0plus.h"
-#include "hardware/platform_defs.h"
 #include "hardware/regs/addressmap.h"
 #include "hardware/regs/sio.h"
 #include "pico/binary_info/defs.h"
@@ -23,24 +23,25 @@
 .section .vectors, "ax"
 .align 2
 
-.global __vectors
+.global __vectors, __VECTOR_TABLE
+__VECTOR_TABLE:
 __vectors:
 .word __StackTop
 .word _reset_handler
 .word isr_nmi
-.word HardFault_Handler
-.word MemManage_Handler
-.word BusFault_Handler
-.word UsageFault_Handler
+.word isr_hardfault
 .word isr_invalid // Reserved, should never fire
 .word isr_invalid // Reserved, should never fire
 .word isr_invalid // Reserved, should never fire
 .word isr_invalid // Reserved, should never fire
-.word SVC_Handler
 .word isr_invalid // Reserved, should never fire
 .word isr_invalid // Reserved, should never fire
-.word PendSV_Handler
-.word SysTick_Handler
+.word isr_invalid // Reserved, should never fire
+.word isr_svcall
+.word isr_invalid // Reserved, should never fire
+.word isr_invalid // Reserved, should never fire
+.word isr_pendsv
+.word isr_systick
 .word isr_irq0
 .word isr_irq1
 .word isr_irq2
@@ -74,6 +75,11 @@ __vectors:
 .word isr_irq30
 .word isr_irq31
 
+// all default exception handlers do nothing, and we can check for them being set to our
+// default values by seeing if they point to somewhere between __defaults_isrs_start and __default_isrs_end
+.global __default_isrs_start
+__default_isrs_start:
+
 // Declare a weak symbol for each ISR.
 // By default, they will fall through to the undefined IRQ handler below (breakpoint),
 // but can be overridden by C functions with correct name.
@@ -89,10 +95,13 @@ __vectors:
 // these are separated out for clarity
 decl_isr_bkpt isr_invalid
 decl_isr_bkpt isr_nmi
-decl_isr_bkpt HardFault_Handler
-decl_isr_bkpt SVC_Handler
-decl_isr_bkpt PendSV_Handler
-decl_isr_bkpt SysTick_Handler
+decl_isr_bkpt isr_hardfault
+decl_isr_bkpt isr_svcall
+decl_isr_bkpt isr_pendsv
+decl_isr_bkpt isr_systick
+
+.global __default_isrs_end
+__default_isrs_end:
 
 .macro decl_isr name
 .weak \name
@@ -241,9 +250,9 @@ bss_fill_test:
 platform_entry: // symbol for stack traces
     // Use 32-bit jumps, in case these symbols are moved out of branch range
     // (e.g. if main is in SRAM and crt0 in flash)
-    //ldr r1, =runtime_init
-    //blx r1
-    ldr r1, =_start
+    ldr r1, =runtime_init
+    blx r1
+    ldr r1, =main
     blx r1
     ldr r1, =exit
     blx r1
@@ -313,3 +322,17 @@ __get_current_exception:
     mrs  r0, ipsr
     uxtb r0, r0
     bx   lr
+
+// ----------------------------------------------------------------------------
+// Stack/heap dummies to set size
+
+.section .stack
+// align to allow for memory protection (although this alignment is pretty much ignored by linker script)
+.align 5
+    .equ StackSize, PICO_STACK_SIZE
+.space StackSize
+
+.section .heap
+.align 2
+    .equ HeapSize, PICO_HEAP_SIZE
+.space HeapSize

@@ -51,7 +51,6 @@ uint32_t PICO_WEAK_FUNCTION_IMPL_NAME(timer_us_32)() {
 PICO_WEAK_FUNCTION_DEF(time_reached)
 bool PICO_WEAK_FUNCTION_IMPL_NAME(time_reached)(absolute_time_t t) {
     uint64_t target = to_us_since_boot(t);
-    if (target > 0xffffffffu) return false;
     return time_us_64() >= target;
 }
 
@@ -66,12 +65,12 @@ void PICO_WEAK_FUNCTION_IMPL_NAME(busy_wait_until)(absolute_time_t target) {
     const int chunk = 1u<<30u;
     uint64_t target_us = to_us_since_boot(target);
     uint64_t time_us = time_us_64();
-    while (target_us - time_us >= chunk) {
+    while ((int64_t)(target_us - time_us) >= chunk) {
         busy_wait_us_32(chunk);
         time_us = time_us_64();
     }
-    if (target_us != time_us) {
-        busy_wait_us_32(target_us - chunk);
+    if (target_us > time_us) {
+        busy_wait_us_32(target_us - time_us);
     }
 #endif
 }

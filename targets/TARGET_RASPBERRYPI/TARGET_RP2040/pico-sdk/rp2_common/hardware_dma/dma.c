@@ -18,6 +18,7 @@ static_assert(__builtin_offsetof(dma_hw_t, ch[1].ctrl_trig) == DMA_CH1_CTRL_TRIG
 
 static_assert(NUM_DMA_CHANNELS <= 16, "");
 static uint16_t _claimed;
+static uint8_t _timer_claimed;
 
 void dma_channel_claim(uint channel) {
     check_dma_channel_param(channel);
@@ -37,6 +38,30 @@ void dma_channel_unclaim(uint channel) {
 
 int dma_claim_unused_channel(bool required) {
     return hw_claim_unused_from_range((uint8_t*)&_claimed, required, 0, NUM_DMA_CHANNELS-1, "No DMA channels are available");
+}
+
+bool dma_channel_is_claimed(uint channel) {
+    check_dma_channel_param(channel);
+    return hw_is_claimed((uint8_t *) &_claimed, channel);
+}
+
+void dma_timer_claim(uint timer) {
+    check_dma_timer_param(timer);
+    hw_claim_or_assert(&_timer_claimed, timer, "DMA timer %d is already claimed");
+}
+
+void dma_timer_unclaim(uint timer) {
+    check_dma_timer_param(timer);
+    hw_claim_clear(&_timer_claimed, timer);
+}
+
+int dma_claim_unused_timer(bool required) {
+    return hw_claim_unused_from_range(&_timer_claimed, required, 0, NUM_DMA_TIMERS-1, "No DMA timers are available");
+}
+
+bool dma_timer_is_claimed(uint timer) {
+    check_dma_timer_param(timer);
+    return hw_is_claimed(&_timer_claimed, timer);
 }
 
 #ifndef NDEBUG
@@ -60,9 +85,10 @@ void print_dma_ctrl(dma_channel_hw_t *channel) {
            ctrl & DMA_CH0_CTRL_TRIG_HIGH_PRIORITY_BITS ? 1 : 0,
            ctrl & DMA_CH0_CTRL_TRIG_EN_BITS ? 1 : 0);
 }
+#endif
 
-void check_dma_channel_param_impl(uint channel) {
+#if PARAM_ASSERTIONS_ENABLED(DMA)
+void check_dma_channel_param_impl(uint __unused channel) {
     valid_params_if(DMA, channel < NUM_DMA_CHANNELS);
 }
-
 #endif
