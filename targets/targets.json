@@ -6900,6 +6900,7 @@
         "components_remove": [
             "QSPIF"
         ],
+        "device_has_add": ["WATCHDOG"],
         "device_has_remove": [
             "QSPI",
             "ITM"
