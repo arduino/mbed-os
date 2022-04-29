@@ -6726,6 +6726,7 @@
         "components_add": [
             "FLASHIAP"
         ],
+        "device_has_add": ["WATCHDOG"],
         "release_versions": ["5"],
         "device_name": "nRF52832_xxAA",
         "macros_add": [
