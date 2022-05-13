@@ -110,7 +110,7 @@ typedef enum {
  * \param baudrate Baudrate requested in Hz
  * \return the actual baud rate set
  */
-uint spi_init(spi_inst_t *spi, uint baudrate);
+uint _spi_init(spi_inst_t *spi, uint baudrate);
 
 /*! \brief Deinitialise SPI instances
  *  \ingroup hardware_spi

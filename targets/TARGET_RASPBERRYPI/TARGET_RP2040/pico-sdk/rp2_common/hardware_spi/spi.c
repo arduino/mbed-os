@@ -18,7 +18,7 @@ static inline void spi_unreset(spi_inst_t *spi) {
     unreset_block_wait(spi == spi0 ? RESETS_RESET_SPI0_BITS : RESETS_RESET_SPI1_BITS);
 }
 
-uint spi_init(spi_inst_t *spi, uint baudrate) {
+uint _spi_init(spi_inst_t *spi, uint baudrate) {
     spi_reset(spi);
     spi_unreset(spi);
 

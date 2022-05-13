@@ -412,7 +412,7 @@ void gpio_acknowledge_irq(uint gpio, uint32_t events);
  *
  * \param gpio GPIO number
  */
-void gpio_init(uint gpio);
+void _gpio_init(uint gpio);
 
 /*! \brief Initialise multiple GPIOs (enabled I/O and set func to GPIO_FUNC_SIO)
  *  \ingroup hardware_gpio
