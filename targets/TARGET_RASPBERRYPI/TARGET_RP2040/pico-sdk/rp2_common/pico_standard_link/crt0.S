@@ -29,7 +29,7 @@ __vectors:
 .word __StackTop
 .word _reset_handler
 .word isr_nmi
-.word isr_hardfault
+.word HardFault_Handler
 .word isr_invalid // Reserved, should never fire
 .word isr_invalid // Reserved, should never fire
 .word isr_invalid // Reserved, should never fire
@@ -37,11 +37,11 @@ __vectors:
 .word isr_invalid // Reserved, should never fire
 .word isr_invalid // Reserved, should never fire
 .word isr_invalid // Reserved, should never fire
-.word isr_svcall
+.word SVC_Handler
 .word isr_invalid // Reserved, should never fire
 .word isr_invalid // Reserved, should never fire
-.word isr_pendsv
-.word isr_systick
+.word PendSV_Handler
+.word SysTick_Handler
 .word isr_irq0
 .word isr_irq1
 .word isr_irq2
@@ -95,10 +95,10 @@ __default_isrs_start:
 // these are separated out for clarity
 decl_isr_bkpt isr_invalid
 decl_isr_bkpt isr_nmi
-decl_isr_bkpt isr_hardfault
-decl_isr_bkpt isr_svcall
-decl_isr_bkpt isr_pendsv
-decl_isr_bkpt isr_systick
+decl_isr_bkpt HardFault_Handler
+decl_isr_bkpt SVC_Handler
+decl_isr_bkpt PendSV_Handler
+decl_isr_bkpt SysTick_Handler
 
 .global __default_isrs_end
 __default_isrs_end:
@@ -250,9 +250,9 @@ bss_fill_test:
 platform_entry: // symbol for stack traces
     // Use 32-bit jumps, in case these symbols are moved out of branch range
     // (e.g. if main is in SRAM and crt0 in flash)
-    ldr r1, =runtime_init
-    blx r1
-    ldr r1, =main
+    //ldr r1, =runtime_init
+    //blx r1
+    ldr r1, =_start
     blx r1
     ldr r1, =exit
     blx r1
