@@ -175,7 +175,7 @@ void runtime_init(void) {
 
 }
 
-void _exit(__unused int status) {
+void __exit(__unused int status) {
 #if PICO_ENTER_USB_BOOT_ON_EXIT
     reset_usb_boot(0,0);
 #else
@@ -214,7 +214,7 @@ void *_sbrk(int incr) {
 
 // exit is not useful... no desire to pull in __call_exitprocs
 void exit(int status) {
-    _exit(status);
+    __exit(status);
 }
 
 // incorrect warning from GCC 6
@@ -225,7 +225,7 @@ void __assert_func(const char *file, int line, const char *func, const char *fai
            failedexpr, file, line, func ? ", function: " : "",
            func ? func : "");
 
-    _exit(1);
+    __exit(1);
 }
 
 #pragma GCC diagnostic pop
@@ -280,7 +280,7 @@ void __attribute__((noreturn)) __printflike(1, 0) panic(const char *fmt, ...) {
 #endif
     }
 
-    _exit(1);
+    __exit(1);
 }
 #endif
 
