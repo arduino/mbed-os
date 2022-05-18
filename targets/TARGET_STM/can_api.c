@@ -550,21 +550,12 @@ static void can_irq(CANName name, int id)
             irq_handler(can_irq_contexts[id], IRQ_TX);
         }
     }
-#if (defined FDCAN_IT_RX_BUFFER_NEW_MESSAGE)
-    if (__HAL_FDCAN_GET_IT_SOURCE(&CanHandle, FDCAN_IT_RX_BUFFER_NEW_MESSAGE)) {
-        if (__HAL_FDCAN_GET_FLAG(&CanHandle, FDCAN_IT_RX_BUFFER_NEW_MESSAGE)) {
-            __HAL_FDCAN_CLEAR_FLAG(&CanHandle, FDCAN_IT_RX_BUFFER_NEW_MESSAGE);
-            irq_handler(can_irq_contexts[id], IRQ_RX);
-        }
-    }
-#else
     if (__HAL_FDCAN_GET_IT_SOURCE(&CanHandle, FDCAN_IT_RX_FIFO0_NEW_MESSAGE)) {
         if (__HAL_FDCAN_GET_FLAG(&CanHandle, FDCAN_IT_RX_FIFO0_NEW_MESSAGE)) {
             __HAL_FDCAN_CLEAR_FLAG(&CanHandle, FDCAN_IT_RX_FIFO0_NEW_MESSAGE);
             irq_handler(can_irq_contexts[id], IRQ_RX);
         }
     }
-#endif
     if (__HAL_FDCAN_GET_IT_SOURCE(&CanHandle, FDCAN_IT_ERROR_WARNING)) {
         if (__HAL_FDCAN_GET_FLAG(&CanHandle, FDCAN_FLAG_ERROR_WARNING)) {
             __HAL_FDCAN_CLEAR_FLAG(&CanHandle, FDCAN_FLAG_ERROR_WARNING);
@@ -632,11 +623,7 @@ void can_irq_set(can_t *obj, CanIrqType type, uint32_t enable)
             interrupts = FDCAN_IT_TX_COMPLETE;
             break;
         case IRQ_RX:
-#if (defined FDCAN_IT_RX_BUFFER_NEW_MESSAGE)
-            interrupts = FDCAN_IT_RX_BUFFER_NEW_MESSAGE;
-#else
             interrupts = FDCAN_IT_RX_FIFO0_NEW_MESSAGE;
-#endif
             break;
         case IRQ_ERROR:
             interrupts = FDCAN_IT_ERROR_WARNING;
