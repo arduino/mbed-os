@@ -48,7 +48,7 @@ using namespace rtos;
 using namespace std::chrono_literals;
 
 AT_CellularContext::AT_CellularContext(ATHandler &at, CellularDevice *device, const char *apn, bool cp_req, bool nonip_req) :
-    _current_op(OP_INVALID), _dcd_pin(NC), _active_high(false), _rat(CATM1), _cp_req(cp_req), _is_connected(false), _at(at)
+    _current_op(OP_INVALID), _dcd_pin(NC), _active_high(false), _rat(CATM1), _band(BAND_20), _cp_req(cp_req), _is_connected(false), _at(at)
 {
     tr_info("New CellularContext %s (%p)", apn ? apn : "", this);
     _nonip_req = nonip_req;
@@ -284,6 +284,11 @@ void AT_CellularContext::set_access_technology(RadioAccessTechnologyType rat)
     _rat = rat;
 }
 
+void AT_CellularContext::set_band(FrequencyBand band)
+{
+    _band = band;
+}
+
 // PDP Context handling
 void AT_CellularContext::delete_current_context()
 {
@@ -440,11 +445,14 @@ bool AT_CellularContext::set_new_context(int cid)
 
 void AT_CellularContext::enable_access_technology()
 {
+    char *buffer = new char [8];
+    memset(buffer, 0, 8);
+    sprintf(buffer,"%08X", _band);
     switch (_rat)
     {
     case CATM1:
         _at.at_cmd_discard("^SXRAT", "=","%d", _rat);
-        _at.cmd_start_stop("^SCFG", "=","%s%d", "Radio/Band/CatM",80000);
+        _at.cmd_start_stop("^SCFG", "=","%s%s", "Radio/Band/CatM",buffer);
         _at.resp_start("^SCFG");
         _at.cmd_start_stop("^SCFG", "=","%s%d%d", "Radio/Band/CatNB",0,0);
         _at.resp_start("^SCFG");
@@ -452,7 +460,7 @@ void AT_CellularContext::enable_access_technology()
 
     case CATNB:
         _at.at_cmd_discard("^SXRAT", "=","%d", _rat);
-        _at.cmd_start_stop("^SCFG", "=","%s%d", "Radio/Band/CatNB",80000);
+        _at.cmd_start_stop("^SCFG", "=","%s%s", "Radio/Band/CatNB",buffer);
         _at.resp_start("^SCFG");
         _at.cmd_start_stop("^SCFG", "=","%s%d%d", "Radio/Band/CatM",0,0);
         _at.resp_start("^SCFG");
@@ -464,6 +472,7 @@ void AT_CellularContext::enable_access_technology()
 
     _at.cmd_start_stop("^SCFG", "=", "%s%s", "Tcp/withURCs", "on");
     _at.resp_start("^SCFG");
+    free(buffer);
 
 }
 
