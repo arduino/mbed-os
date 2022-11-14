@@ -170,6 +170,11 @@ wiced_result_t wiced_filesystem_mount(BlockDevice *device, wiced_filesystem_hand
     return WICED_ERROR;
 }
 
+wiced_result_t wiced_filesystem_mount_default(void)
+{
+    return wiced_filesystem_mount(mbr_bd, 0, &resource_fs_handle, WIFI_DEFAULT_MOUNT_NAME);
+}
+
 wiced_result_t wiced_filesystem_file_open(wiced_filesystem_t *fs_handle, wiced_file_t *file_handle_out, const char *filename, wiced_filesystem_open_mode_t mode)
 {
     /* This is called by mbed test system */
