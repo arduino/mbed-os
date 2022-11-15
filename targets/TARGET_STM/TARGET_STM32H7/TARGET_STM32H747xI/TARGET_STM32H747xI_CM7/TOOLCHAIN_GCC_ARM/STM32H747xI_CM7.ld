@@ -113,22 +113,22 @@ SECTIONS
         *(SORT(.dtors.*))
         *(.dtors)
 
-#if (defined(MCUBOOT_BOOTLOADER_BUILD) || defined(BOOTLOADER_BUILD))  && (defined(TARGET_PORTENTA_H7_M7) || defined(TARGET_NICLA_VISION) || defined(TARGET_OPTA))
+        *(.rodata*)
+        KEEP(*(.eh_frame*))
+
         *ltrans0*.o(.rodata*)
         *ltrans1*.o(.rodata*)
         *ltrans2*.o(.rodata*)
         *ltrans3*.o(.rodata*)
         *ltrans4*.o(.rodata*)
 
+        *lib*.o(.rodata*)
+
+#if (defined(MCUBOOT_BOOTLOADER_BUILD) || defined(BOOTLOADER_BUILD))  && (defined(TARGET_PORTENTA_H7_M7) || defined(TARGET_NICLA_VISION) || defined(TARGET_OPTA))
         . = ABSOLUTE(0x0801F000);
         KEEP(*(.bootloader_version))
-
-        *lib*.o(.rodata*)
 #endif
 
-        *(.rodata*)
-
-        KEEP(*(.eh_frame*))
     } > FLASH
 
     .ARM.extab :
