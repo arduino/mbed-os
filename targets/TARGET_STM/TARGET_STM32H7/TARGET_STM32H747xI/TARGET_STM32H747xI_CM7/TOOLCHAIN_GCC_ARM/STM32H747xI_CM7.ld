@@ -113,8 +113,10 @@ SECTIONS
         *(SORT(.dtors.*))
         *(.dtors)
 
+#if !(defined(MCUBOOT_BOOTLOADER_BUILD)  && defined(TARGET_PORTENTA_H7_M7))
         *(.rodata*)
         KEEP(*(.eh_frame*))
+#endif
 
         *ltrans0*.o(.rodata*)
         *ltrans1*.o(.rodata*)
@@ -122,11 +124,21 @@ SECTIONS
         *ltrans3*.o(.rodata*)
         *ltrans4*.o(.rodata*)
 
-        *lib*.o(.rodata*)
-
-#if (defined(MCUBOOT_BOOTLOADER_BUILD) || defined(BOOTLOADER_BUILD))  && (defined(TARGET_PORTENTA_H7_M7) || defined(TARGET_NICLA_VISION) || defined(TARGET_OPTA))
+#if (defined(MCUBOOT_BOOTLOADER_BUILD)  && defined(TARGET_PORTENTA_H7_M7))
         . = ABSOLUTE(0x0801F000);
         KEEP(*(.bootloader_version))
+#endif
+
+        *lib*.o(.rodata*)
+
+#if (defined(MCUBOOT_BOOTLOADER_BUILD) || defined(BOOTLOADER_BUILD))  && ( defined(TARGET_NICLA_VISION) || defined(TARGET_OPTA))
+        . = ABSOLUTE(0x0801F000);
+        KEEP(*(.bootloader_version))
+#endif
+
+#if (defined(MCUBOOT_BOOTLOADER_BUILD)  && defined(TARGET_PORTENTA_H7_M7))
+        *(.rodata*)
+        KEEP(*(.eh_frame*))
 #endif
 
     } > FLASH
