@@ -36,10 +36,25 @@ void analogin_pll_configuration(void)
 
     RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
     PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_ADC;
-    PeriphClkInitStruct.PLL2.PLL2M = 4;
-    PeriphClkInitStruct.PLL2.PLL2N = 240;
-    PeriphClkInitStruct.PLL2.PLL2P = 2;
-    PeriphClkInitStruct.PLL2.PLL2Q = 2;
+    if(__HAL_RCC_GET_PLL_OSCSOURCE() == RCC_PLLSOURCE_HSI) {
+        PeriphClkInitStruct.PLL2.PLL2M = 16;
+        PeriphClkInitStruct.PLL2.PLL2N = 120;
+    } else {
+        #if HSE_VALUE==8000000
+        PeriphClkInitStruct.PLL2.PLL2M = 2;
+        PeriphClkInitStruct.PLL2.PLL2N = 120;
+        #elif HSE_VALUE==16000000
+        PeriphClkInitStruct.PLL2.PLL2M = 2;
+        PeriphClkInitStruct.PLL2.PLL2N = 60;
+        #elif HSE_VALUE==25000000
+        PeriphClkInitStruct.PLL2.PLL2M = 5;
+        PeriphClkInitStruct.PLL2.PLL2N = 96;
+        #else
+        error("HSE not configured properly");
+        #endif
+    }
+    PeriphClkInitStruct.PLL2.PLL2P = 3;
+    PeriphClkInitStruct.PLL2.PLL2Q = 4;
     PeriphClkInitStruct.PLL2.PLL2R = 2;
     PeriphClkInitStruct.PLL2.PLL2RGE = RCC_PLL2VCIRANGE_1;
     PeriphClkInitStruct.PLL2.PLL2VCOSEL = RCC_PLL2VCOWIDE;
