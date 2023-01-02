@@ -1172,9 +1172,11 @@ int QSPIFBlockDevice::_handle_vendor_quirks()
             break;
         case 0x1f:
             // Adesto device
-            tr_debug("Applying quirks for Adesto AT25SF128A");
-            _write_status_reg_2_inst = 0x31;
-            _AT25SF128A_quirk = true;
+            if (vendor_device_ids[1] == 0x89) {
+                tr_debug("Applying quirks for Adesto AT25SF128A");
+                _write_status_reg_2_inst = 0x31;
+                _AT25SF128A_quirk = true;
+            }
             break;
     }
 
