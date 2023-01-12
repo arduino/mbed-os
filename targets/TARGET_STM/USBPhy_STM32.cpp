@@ -33,15 +33,19 @@
 
 /* endpoint defines */
 
+#if defined(TARGET_STM32H7)
+#define NUM_ENDPOINTS                6      // should be 8 but this would complicate everything
+#else
+#define NUM_ENDPOINTS                4
+#endif
+
 #if (MBED_CONF_TARGET_USB_SPEED == USE_USB_OTG_HS)
 
-#define NUM_ENDPOINTS                6
 #define MAX_PACKET_SIZE_NON_ISO      512
 #define MAX_PACKET_SIZE_ISO          1023
 
 #else
 
-#define NUM_ENDPOINTS                4
 #define MAX_PACKET_SIZE_NON_ISO      64
 #define MAX_PACKET_SIZE_ISO          (256 + 128)     // Spec can go up to 1023, only ram for this though
 
@@ -51,7 +55,7 @@ static const uint32_t tx_ep_sizes[NUM_ENDPOINTS] = {
     MAX_PACKET_SIZE_NON_ISO,
     MAX_PACKET_SIZE_NON_ISO,
     MAX_PACKET_SIZE_NON_ISO,
-#if (MBED_CONF_TARGET_USB_SPEED == USE_USB_OTG_HS)
+#if defined(TARGET_STM32H7)
     MAX_PACKET_SIZE_NON_ISO,
     MAX_PACKET_SIZE_NON_ISO,
 #endif
@@ -426,7 +430,7 @@ void USBPhyHw::init(USBPhyEvents *events)
         total_bytes += fifo_size;
     }
 
-#if (MBED_CONF_TARGET_USB_SPEED != USE_USB_OTG_HS)
+#if !defined(TARGET_STM32H7)
     /* 1.25 kbytes */
     MBED_ASSERT(total_bytes <= 1280);
 #endif
@@ -536,24 +540,12 @@ const usb_ep_table_t *USBPhyHw::endpoint_table()
             {USB_EP_ATTR_ALLOW_CTRL                         | USB_EP_ATTR_DIR_IN_AND_OUT, 0, 0},
             {USB_EP_ATTR_ALLOW_BULK | USB_EP_ATTR_ALLOW_INT | USB_EP_ATTR_DIR_IN_AND_OUT, 0, 0}, // NON ISO
             {USB_EP_ATTR_ALLOW_BULK | USB_EP_ATTR_ALLOW_INT | USB_EP_ATTR_DIR_IN_AND_OUT, 0, 0}, // NON ISO
-#if (MBED_CONF_TARGET_USB_SPEED == USE_USB_OTG_HS)
+#if defined(TARGET_STM32H7)
+            {USB_EP_ATTR_ALLOW_ALL                          | USB_EP_ATTR_DIR_IN_AND_OUT, 0, 0},
+            {USB_EP_ATTR_ALLOW_ALL                          | USB_EP_ATTR_DIR_IN_AND_OUT, 0, 0},
             {USB_EP_ATTR_ALLOW_ALL                          | USB_EP_ATTR_DIR_IN_AND_OUT, 0, 0},
 #endif
             {USB_EP_ATTR_ALLOW_ALL                          | USB_EP_ATTR_DIR_IN_AND_OUT, 0, 0},
-            {0                     | USB_EP_ATTR_DIR_IN_AND_OUT,  0, 0},
-            {0                     | USB_EP_ATTR_DIR_IN_AND_OUT,  0, 0},
-            {0                     | USB_EP_ATTR_DIR_IN_AND_OUT,  0, 0},
-            {0                     | USB_EP_ATTR_DIR_IN_AND_OUT,  0, 0},
-            {0                     | USB_EP_ATTR_DIR_IN_AND_OUT,  0, 0},
-            {0                     | USB_EP_ATTR_DIR_IN_AND_OUT,  0, 0},
-            {0                     | USB_EP_ATTR_DIR_IN_AND_OUT,  0, 0},
-            {0                     | USB_EP_ATTR_DIR_IN_AND_OUT,  0, 0},
-            {0                     | USB_EP_ATTR_DIR_IN_AND_OUT,  0, 0},
-            {0                     | USB_EP_ATTR_DIR_IN_AND_OUT,  0, 0},
-            {0                     | USB_EP_ATTR_DIR_IN_AND_OUT,  0, 0},
-#if (MBED_CONF_TARGET_USB_SPEED != USE_USB_OTG_HS)
-            {0                     | USB_EP_ATTR_DIR_IN_AND_OUT,  0, 0}
-#endif
         }
     };
     return &table;
