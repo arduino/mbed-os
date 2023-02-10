@@ -66,7 +66,7 @@ void pwmout_init(pwmout_t *obj, PinName pin)
     obj->cfg = pwm_get_default_config();
     pwm_config_set_wrap(&(obj->cfg), count_top);
 
-    pwm_init(obj->slice, &(obj->cfg), false);
+    pwm_init(obj->slice, obj->channel, &(obj->cfg), false);
     gpio_set_function(pin, GPIO_FUNC_PWM);
 }
 
@@ -142,7 +142,7 @@ void pwmout_period_us(pwmout_t *obj, int period)
     uint32_t min_period = 1000000 * count_top / clock_get_hz(clk_sys);
 
     pwm_config_set_clkdiv(&(obj->cfg), (float)period / (float)min_period);
-    pwm_init(obj->slice, &(obj->cfg), false);
+    pwm_init(obj->slice, obj->channel, &(obj->cfg), false);
 }
 
 int pwmout_read_period_us(pwmout_t *obj)
