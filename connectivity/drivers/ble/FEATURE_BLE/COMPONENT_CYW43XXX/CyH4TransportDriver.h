@@ -137,5 +137,6 @@ private:
 
 ble::vendor::cypress_ble::CyH4TransportDriver& ble_cordio_get_default_h4_transport_driver();
 ble::vendor::cypress_ble::CyH4TransportDriver& ble_cordio_get_h4_transport_driver();
+void ble_cordio_set_cycfg_bt_lp_mode(bool status);
 #endif
 #endif /* CY_H4TRANSPORT_DRIVER_H_ */

@@ -557,3 +557,7 @@ ble::CordioHCIDriver& ble_cordio_get_hci_driver()
     );
     return hci_driver;
 }
+
+void ble_cordio_set_lp_mode(bool status) {
+    ble_cordio_set_cycfg_bt_lp_mode(status);
+}
