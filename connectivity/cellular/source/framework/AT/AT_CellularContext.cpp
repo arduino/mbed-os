@@ -452,26 +452,21 @@ void AT_CellularContext::enable_access_technology()
     {
     case CATM1:
         _at.at_cmd_discard("^SXRAT", "=","%d", _rat);
-        _at.cmd_start_stop("^SCFG", "=","%s%s", "Radio/Band/CatM",buffer);
-        _at.resp_start("^SCFG");
-        _at.cmd_start_stop("^SCFG", "=","%s%d%d", "Radio/Band/CatNB",0,0);
-        _at.resp_start("^SCFG");
+        _at.at_cmd_discard("^SCFG", "=","%s%s", "Radio/Band/CatM",buffer);
+        _at.at_cmd_discard("^SCFG", "=","%s%d%d", "Radio/Band/CatNB",0,0);
         break;
 
     case CATNB:
         _at.at_cmd_discard("^SXRAT", "=","%d", _rat);
-        _at.cmd_start_stop("^SCFG", "=","%s%s", "Radio/Band/CatNB",buffer);
-        _at.resp_start("^SCFG");
-        _at.cmd_start_stop("^SCFG", "=","%s%d%d", "Radio/Band/CatM",0,0);
-        _at.resp_start("^SCFG");
+        _at.at_cmd_discard("^SCFG", "=","%s%s", "Radio/Band/CatNB",buffer);
+        _at.at_cmd_discard("^SCFG", "=","%s%d%d", "Radio/Band/CatM",0,0);
         break;
 
     default:
         break;
     }
 
-    _at.cmd_start_stop("^SCFG", "=", "%s%s", "Tcp/withURCs", "on");
-    _at.resp_start("^SCFG");
+    _at.at_cmd_discard("^SCFG", "=", "%s%s", "Tcp/withURCs", "on");
     free(buffer);
 
 }
