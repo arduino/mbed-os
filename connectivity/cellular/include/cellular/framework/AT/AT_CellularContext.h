@@ -135,8 +135,6 @@ private:
 
     PinName _dcd_pin;
     bool _active_high;
-    RadioAccessTechnologyType _rat;
-    FrequencyBand _band;
 
 protected:
     char _found_apn[MAX_APN_LENGTH];
@@ -144,6 +142,8 @@ protected:
     bool _cp_req;
     bool _is_connected;
     ATHandler &_at;
+    RadioAccessTechnologyType _rat;
+    FrequencyBand _band;
 };
 
 } // namespace mbed
