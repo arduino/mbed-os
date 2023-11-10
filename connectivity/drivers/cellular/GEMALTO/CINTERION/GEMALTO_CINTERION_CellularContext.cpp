@@ -158,13 +158,11 @@ void GEMALTO_CINTERION_CellularContext::enable_access_technology()
     case CATM1:
         _at.at_cmd_discard("^SXRAT", "=","%d", _rat);
         _at.at_cmd_discard("^SCFG", "=","%s%s", "Radio/Band/CatM",buffer);
-        _at.at_cmd_discard("^SCFG", "=","%s%d%d", "Radio/Band/CatNB",0,0);
         break;
 
     case CATNB:
         _at.at_cmd_discard("^SXRAT", "=","%d", _rat);
         _at.at_cmd_discard("^SCFG", "=","%s%s", "Radio/Band/CatNB",buffer);
-        _at.at_cmd_discard("^SCFG", "=","%s%d%d", "Radio/Band/CatM",0,0);
         break;
 
     default:
