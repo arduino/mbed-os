@@ -109,7 +109,7 @@ protected:
      *  @return     NIDD context text, e.g. Non-IP or NONIP
      */
     virtual const char *get_nonip_context_type_str();
-    virtual void enable_access_technology();
+    virtual nsapi_error_t enable_access_technology();
     virtual void set_cid(int cid);
 
 private:

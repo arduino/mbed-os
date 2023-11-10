@@ -148,30 +148,35 @@ NetworkStack *GEMALTO_CINTERION_CellularContext::get_stack()
 }
 #endif // NSAPI_PPP_AVAILABLE
 
-void GEMALTO_CINTERION_CellularContext::enable_access_technology()
+nsapi_error_t GEMALTO_CINTERION_CellularContext::enable_access_technology()
 {
-    char *buffer = new char [8];
-    memset(buffer, 0, 8);
-    sprintf(buffer,"%08X", _band);
+    nsapi_error_t error = NSAPI_ERROR_OK;
+    char buffer[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+    snprintf(buffer, 9, "%08X", _band);
     switch (_rat)
     {
     case CATM1:
-        _at.at_cmd_discard("^SXRAT", "=","%d", _rat);
-        _at.at_cmd_discard("^SCFG", "=","%s%s", "Radio/Band/CatM",buffer);
+        error = _at.at_cmd_discard("^SCFG", "=","%s%s", "Radio/Band/CatM", buffer);
         break;
 
     case CATNB:
-        _at.at_cmd_discard("^SXRAT", "=","%d", _rat);
-        _at.at_cmd_discard("^SCFG", "=","%s%s", "Radio/Band/CatNB",buffer);
+        error = _at.at_cmd_discard("^SCFG", "=","%s%s", "Radio/Band/CatNB", buffer);
         break;
 
     default:
         break;
     }
+    if (error != NSAPI_ERROR_OK) {
+        return error;
+    }
 
-    _at.at_cmd_discard("^SCFG", "=", "%s%s", "Tcp/withURCs", "on");
-    free(buffer);
+    error = _at.at_cmd_discard("^SXRAT", "=","%d", _rat);
+    if (error != NSAPI_ERROR_OK) {
+        return error;
+    }
 
+    return _at.at_cmd_discard("^SCFG", "=", "%s%s", "Tcp/withURCs", "on");
 }
 
 } /* namespace mbed */

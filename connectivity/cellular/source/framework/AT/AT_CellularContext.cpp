@@ -443,9 +443,9 @@ bool AT_CellularContext::set_new_context(int cid)
     return success;
 }
 
-void AT_CellularContext::enable_access_technology()
+nsapi_error_t AT_CellularContext::enable_access_technology()
 {
-    enable_access_technology();
+    return enable_access_technology();
 }
 
 nsapi_error_t AT_CellularContext::do_activate_context()
