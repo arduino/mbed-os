@@ -33,22 +33,41 @@ GEMALTO_CINTERION_CellularContext::~GEMALTO_CINTERION_CellularContext()
 nsapi_error_t GEMALTO_CINTERION_CellularContext::connect(const char *sim_pin, const char *apn, const char *uname,
                                           const char *pwd)
 {
+    nsapi_error_t error = NSAPI_ERROR_OK;
+
     set_sim_pin(sim_pin);
     set_credentials(apn, uname, pwd);
 
-    set_device_ready();
+    error = set_device_ready();
+    if ((error != NSAPI_ERROR_OK) && (error != NSAPI_ERROR_ALREADY)) {
+        tr_error("Failure connecting to GEMALTO CINTERION modem");
+        return error;
+    }
 
     _at.lock();
     bool valid_context = get_context();
     _at.unlock();
 
-    if(!valid_context) {
-        set_new_context(_cid);
+    if (!valid_context) {
+        valid_context = set_new_context(_cid);
     }
 
-    do_user_authentication();
+    if (!valid_context) {
+        tr_error("Invalid AT cellular context %d", _cid);
+        return NSAPI_ERROR_DEVICE_ERROR;
+    }
 
-    enable_access_technology();
+    error = do_user_authentication();
+    if (error != NSAPI_ERROR_OK) {
+        tr_error("Failure during user authentication");
+        return error;
+    }
+
+    error = enable_access_technology();
+    if (error != NSAPI_ERROR_OK) {
+        tr_error("Failure enabling access technology");
+        return error;
+    }
 
     return AT_CellularContext::connect();
 }
