@@ -145,10 +145,11 @@ nsapi_error_t TLSSocketWrapper::append_root_ca_cert(const void *root_ca, size_t 
 
     crt = get_ca_chain();
     if (!crt) {
-        return NSAPI_ERROR_NO_MEMORY;
+        /* In no chain is configured create a new one */
+        return set_root_ca_cert(root_ca, len);
     }
 
-    /* Parse CA certification */
+    /* Append root_ca to the crt chain */
     int ret;
     if ((ret = mbedtls_x509_crt_parse(crt, static_cast<const unsigned char *>(root_ca),
                                       len)) != 0) {
