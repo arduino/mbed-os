@@ -169,6 +169,11 @@ nsapi_error_t LWIP::Interface::set_dhcp()
 
 #if LWIP_DHCP
     if (dhcp_has_to_be_set) {
+        if(dhcp_started) {
+            dhcp_stop(&netif);
+            dhcp_started = false;
+        }
+
         err_t err = dhcp_start(&netif);
         dhcp_has_to_be_set = false;
         if (err) {
@@ -200,9 +205,7 @@ void LWIP::Interface::netif_link_irq(struct netif *netif)
         }
     } else {
         if(interface->dhcp_started) {
-            interface->dhcp_started = false;
             interface->dhcp_has_to_be_set = true;
-            dhcp_stop(netif);
         }
         osSemaphoreRelease(interface->unlinked);
         if (netif_is_up(&interface->netif)) {
