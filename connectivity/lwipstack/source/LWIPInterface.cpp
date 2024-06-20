@@ -199,6 +199,11 @@ void LWIP::Interface::netif_link_irq(struct netif *netif)
             netif_set_down(&interface->netif);
         }
     } else {
+        if(interface->dhcp_started) {
+            interface->dhcp_started = false;
+            interface->dhcp_has_to_be_set = true;
+            dhcp_stop(netif);
+        }
         osSemaphoreRelease(interface->unlinked);
         if (netif_is_up(&interface->netif)) {
             interface->connected = NSAPI_STATUS_CONNECTING;
