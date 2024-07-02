@@ -68,6 +68,7 @@ void HAL_ETH_MspInit(ETH_HandleTypeDef *heth)
 #if !(defined(DUAL_CORE) && defined(CORE_CM4))
         /* Disable DCache for STM32H7 family */
         core_util_critical_section_enter();
+        SCB_CleanInvalidateDCache();
         SCB_DisableDCache();
         core_util_critical_section_exit();
 #endif
