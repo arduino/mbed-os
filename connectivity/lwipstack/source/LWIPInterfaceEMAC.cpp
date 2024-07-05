@@ -27,15 +27,28 @@
 
 #if LWIP_ETHERNET
 
+extern "C" void log_add(const char *fmt, ...);
+
 err_t LWIP::Interface::emac_low_level_output(struct netif *netif, struct pbuf *p)
 {
+    bool ret = false;
     /* Increase reference counter since lwip stores handle to pbuf and frees
        it after output */
     pbuf_ref(p);
 
     LWIP::Interface *mbed_if = static_cast<LWIP::Interface *>(netif->state);
-    bool ret = mbed_if->emac->link_out(p);
-    return ret ? ERR_OK : ERR_IF;
+
+    if(mbed_if->emac->is_ready_to_tx()) {
+        ret = mbed_if->emac->link_out(p);
+    }
+    else {
+        log_add("!!!! emac is NOT OK ---> RESTART!!!");
+        mbed_if->emac->restart();
+        ret = mbed_if->emac->link_out(p);
+    }
+
+    err_t rv = ret ? ERR_OK : ERR_IF;
+    return rv;
 }
 
 void LWIP::Interface::emac_input(emac_mem_buf_t *buf)

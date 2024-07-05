@@ -403,6 +403,33 @@ bool STM32_EMAC::low_level_init_successful()
 #endif // ETH_IP_VERSION_V2
 
 /**
+ * This function get the state of emac interface
+ */
+int STM32_EMAC::get_interface_status() {
+    return HAL_ETH_GetStateOnly(&EthHandle);
+}
+
+/**
+ * This function returns true if the status of the interface is in the 
+ * correct state for the trasmission
+ */
+bool STM32_EMAC::is_ready_to_tx() {
+    return (HAL_ETH_GetStateOnly(&EthHandle) == HAL_ETH_STATE_READY);
+}
+
+/**
+ * This function reset the emac interface in case the status is in error
+ * Apparently there was not anything to recover from an error state
+ */ 
+void STM32_EMAC::restart() {
+    if(HAL_ETH_STATE_ERROR == HAL_ETH_GetStateOnly(&EthHandle)){
+        HAL_ETH_Stop(&EthHandle);
+        HAL_ETH_Start(&EthHandle);
+    }
+}
+
+
+/**
  * This function should do the actual transmission of the packet. The packet is
  * contained in the memory buffer chain that is passed to the function.
  *

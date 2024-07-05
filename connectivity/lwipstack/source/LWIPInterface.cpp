@@ -175,7 +175,6 @@ nsapi_error_t LWIP::Interface::set_dhcp()
         }
 
         err_t err = dhcp_start(&netif);
-        dhcp_has_to_be_set = false;
         if (err) {
             connected = NSAPI_STATUS_DISCONNECTED;
             if (client_callback) {
@@ -204,9 +203,6 @@ void LWIP::Interface::netif_link_irq(struct netif *netif)
             netif_set_down(&interface->netif);
         }
     } else {
-        if(interface->dhcp_started) {
-            interface->dhcp_has_to_be_set = true;
-        }
         osSemaphoreRelease(interface->unlinked);
         if (netif_is_up(&interface->netif)) {
             interface->connected = NSAPI_STATUS_CONNECTING;
