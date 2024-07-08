@@ -169,8 +169,12 @@ nsapi_error_t LWIP::Interface::set_dhcp()
 
 #if LWIP_DHCP
     if (dhcp_has_to_be_set) {
+        if(dhcp_started) {
+            dhcp_stop(&netif);
+            dhcp_started = false;
+        }
+
         err_t err = dhcp_start(&netif);
-        dhcp_has_to_be_set = false;
         if (err) {
             connected = NSAPI_STATUS_DISCONNECTED;
             if (client_callback) {

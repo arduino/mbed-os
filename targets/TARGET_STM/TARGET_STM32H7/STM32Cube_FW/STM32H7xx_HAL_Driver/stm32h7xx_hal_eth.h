@@ -1654,6 +1654,7 @@ HAL_StatusTypeDef HAL_ETH_SetWakeUpFilter(ETH_HandleTypeDef *heth, uint32_t *pFi
   */
 /* Peripheral State functions  **************************************************/
 HAL_ETH_StateTypeDef HAL_ETH_GetState(ETH_HandleTypeDef *heth);
+HAL_ETH_StateTypeDef HAL_ETH_GetStateOnly(ETH_HandleTypeDef *heth);
 uint32_t             HAL_ETH_GetError(ETH_HandleTypeDef *heth);
 uint32_t             HAL_ETH_GetDMAError(ETH_HandleTypeDef *heth);
 uint32_t             HAL_ETH_GetMACError(ETH_HandleTypeDef *heth);

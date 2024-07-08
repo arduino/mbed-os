@@ -2333,6 +2333,10 @@ HAL_StatusTypeDef HAL_ETH_SetWakeUpFilter(ETH_HandleTypeDef *heth, uint32_t *pFi
   * @{
   */
 
+HAL_ETH_StateTypeDef HAL_ETH_GetStateOnly(ETH_HandleTypeDef *heth) {
+  return  heth->gState;
+}
+
 /**
   * @brief  Returns the ETH state.
   * @param  heth: pointer to a ETH_HandleTypeDef structure that contains
