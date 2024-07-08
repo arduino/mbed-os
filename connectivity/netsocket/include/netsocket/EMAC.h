@@ -177,9 +177,16 @@ public:
      */
     virtual void set_memory_manager(EMACMemoryManager &mem_mngr) = 0;
 
-    virtual bool is_ready_to_tx() { return false;}
-    virtual void restart() {}
-    virtual int get_interface_status() { return -1; }
+    virtual bool is_ready_to_tx() { 
+        return false;
+    }
+    
+    virtual void restart() {
+    }
+
+    virtual int get_interface_status() { 
+        return -1; 
+    }
 };
 
 

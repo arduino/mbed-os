@@ -27,7 +27,6 @@
 
 #if LWIP_ETHERNET
 
-extern "C" void log_add(const char *fmt, ...);
 
 err_t LWIP::Interface::emac_low_level_output(struct netif *netif, struct pbuf *p)
 {
@@ -42,7 +41,6 @@ err_t LWIP::Interface::emac_low_level_output(struct netif *netif, struct pbuf *p
         ret = mbed_if->emac->link_out(p);
     }
     else {
-        log_add("!!!! emac is NOT OK ---> RESTART!!!");
         mbed_if->emac->restart();
         ret = mbed_if->emac->link_out(p);
     }
