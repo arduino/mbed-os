@@ -408,7 +408,7 @@ private:
         if (cmd_opcode != opcode)  {
             // DO something in case of error
 
-            while (true);
+            return;
 
         }
 
