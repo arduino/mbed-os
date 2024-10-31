@@ -59,7 +59,7 @@ void GEMALTO_CINTERION_CellularStack::urc_sis()
         }
         if (urc_code == 0) {
             int urc_info_id = _at.read_int();
-            if (urc_info_id == 48) {
+            if (urc_info_id == 48 || urc_info_id == 20) {
                 tr_info("Socket closed %d", sock_id);
                 sock->closed = true;
                 if (sock->_cb) {
