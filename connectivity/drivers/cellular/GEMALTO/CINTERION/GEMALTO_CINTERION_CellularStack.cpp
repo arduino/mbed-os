@@ -527,8 +527,13 @@ sisw_retry:
     return (_at.get_last_error() == NSAPI_ERROR_OK) ? accept_len : NSAPI_ERROR_DEVICE_ERROR;
 }
 
-#define DISABLE_URCs _at.at_cmd_discard("^SCFG", "=", "%s%s","Tcp/WithURCs","off")
-#define RESTORE_URCs_AND_RETURN(ret) do { _at.at_cmd_discard("^SCFG", "=", "%s%s","Tcp/WithURCs","on"); return ret; } while(0)
+#if defined GEMALTO_CINTERION_DISABLE_URC_READING
+  #define DISABLE_URCs _at.at_cmd_discard("^SCFG", "=", "%s%s","Tcp/WithURCs","off")
+  #define RESTORE_URCs_AND_RETURN(ret) do { _at.at_cmd_discard("^SCFG", "=", "%s%s","Tcp/WithURCs","on"); return ret; } while(0)
+#else
+  #define DISABLE_URCs
+  #define RESTORE_URCs_AND_RETURN(ret) do { return ret; } while(0)
+#endif
 
 nsapi_size_or_error_t GEMALTO_CINTERION_CellularStack::socket_recvfrom_impl(CellularSocket *socket, SocketAddress *address,
                                                                             void *buffer, nsapi_size_t size)
