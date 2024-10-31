@@ -35,6 +35,11 @@ nsapi_error_t GEMALTO_CINTERION_CellularContext::connect(const char *sim_pin, co
 {
     nsapi_error_t error = NSAPI_ERROR_OK;
 
+    if (_stack) {
+        delete _stack;
+        _stack = NULL;
+    }
+
     set_sim_pin(sim_pin);
     set_credentials(apn, uname, pwd);
 
