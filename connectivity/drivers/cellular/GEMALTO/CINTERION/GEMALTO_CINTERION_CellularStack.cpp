@@ -47,6 +47,8 @@ void GEMALTO_CINTERION_CellularStack::urc_sis()
     int sock_id = _at.read_int();
     int urc_code = _at.read_int();
     CellularSocket *sock = find_socket(sock_id);
+
+    tr_info("urc_sis socket id %d urc code %d\n\r", sock_id, urc_code);
     if (sock) {
         // Currently only UDP is supported so there is need to handle only some error codes here,
         // and others are detected on sendto/recvfrom responses.
@@ -59,6 +61,7 @@ void GEMALTO_CINTERION_CellularStack::urc_sis()
         }
         if (urc_code == 0) {
             int urc_info_id = _at.read_int();
+            tr_info("urcInfoId %d\n\r", urc_info_id);
             if (urc_info_id == 48 || urc_info_id == 20) {
                 tr_info("Socket closed %d", sock_id);
                 sock->closed = true;
