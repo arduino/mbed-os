@@ -55,6 +55,7 @@ protected: // AT_CellularDevice
 
 protected:
     virtual nsapi_error_t init();
+    virtual nsapi_error_t shutdown();
 
 private:
     static Module _module;

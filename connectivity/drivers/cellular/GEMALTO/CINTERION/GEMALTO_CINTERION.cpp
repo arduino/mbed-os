@@ -92,6 +92,12 @@ nsapi_error_t GEMALTO_CINTERION::init()
     return NSAPI_ERROR_OK;
 }
 
+nsapi_error_t GEMALTO_CINTERION::shutdown()
+{
+    CellularDevice::shutdown();
+    return NSAPI_ERROR_OK;
+}
+
 GEMALTO_CINTERION::Module GEMALTO_CINTERION::get_module()
 {
     return _module;
