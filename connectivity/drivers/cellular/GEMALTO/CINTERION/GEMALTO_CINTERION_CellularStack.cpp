@@ -252,13 +252,9 @@ nsapi_error_t GEMALTO_CINTERION_CellularStack::socket_close_impl(int sock_id)
 {
     tr_debug("Cinterion close %d", sock_id);
 
-    _at.set_at_timeout(FAILURE_TIMEOUT);
-
     _at.at_cmd_discard("^SISC", "=", "%d", sock_id);
 
     _at.clear_error(); // clear SISS even though SISC fails
-
-    _at.restore_at_timeout();
 
     return _at.get_last_error();
 }
