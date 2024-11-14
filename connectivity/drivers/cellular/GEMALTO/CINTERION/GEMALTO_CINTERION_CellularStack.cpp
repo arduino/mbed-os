@@ -309,6 +309,7 @@ nsapi_error_t GEMALTO_CINTERION_CellularStack::gethostbyname(const char *host, S
         } else {
             //Null string received
             tr_info("Read %d bytes. Null string", size);
+            _at.unlock();
             return NSAPI_ERROR_NO_ADDRESS;
         }
     }
