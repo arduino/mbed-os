@@ -458,7 +458,7 @@ void CellularStateMachine::state_signal_quality()
 {
     _cb_data.error = _network.get_signal_quality(_signal_quality.rssi, &_signal_quality.ber);
 
-    if (_cb_data.error != NSAPI_ERROR_OK) {
+    if ((_cb_data.error != NSAPI_ERROR_OK) || (_signal_quality.rssi == CellularNetwork::SignalQuality::SignalQualityUnknown)) {
         retry_state_or_fail();
     } else {
         _cb_data.data = &_signal_quality;
