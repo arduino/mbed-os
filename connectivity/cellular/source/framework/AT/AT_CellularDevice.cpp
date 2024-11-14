@@ -187,6 +187,11 @@ nsapi_error_t AT_CellularDevice::soft_power_off()
     return NSAPI_ERROR_OK;
 }
 
+nsapi_error_t AT_CellularDevice::soft_reset()
+{
+    return NSAPI_ERROR_OK;
+}
+
 ATHandler *AT_CellularDevice::get_at_handler()
 {
     return &_at;

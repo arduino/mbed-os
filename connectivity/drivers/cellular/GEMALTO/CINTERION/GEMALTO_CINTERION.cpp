@@ -98,6 +98,16 @@ nsapi_error_t GEMALTO_CINTERION::shutdown()
     return NSAPI_ERROR_OK;
 }
 
+nsapi_error_t GEMALTO_CINTERION::soft_power_off()
+{
+    return _at.at_cmd_discard("^SMSO=", "fast");
+}
+
+nsapi_error_t GEMALTO_CINTERION::soft_reset()
+{
+    return _at.at_cmd_discard("+CFUN", "=1,1");
+}
+
 GEMALTO_CINTERION::Module GEMALTO_CINTERION::get_module()
 {
     return _module;
