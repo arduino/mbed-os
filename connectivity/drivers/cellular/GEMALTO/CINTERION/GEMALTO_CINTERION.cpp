@@ -29,6 +29,17 @@ GEMALTO_CINTERION::Module GEMALTO_CINTERION::_module;
 
 GEMALTO_CINTERION::GEMALTO_CINTERION(FileHandle *fh) : AT_CellularDevice(fh)
 {
+#if defined(MBED_CONF_GEMALTO_CINTERION_ELS61)
+    init_module_els61();
+#elif defined(MBED_CONF_GEMALTO_CINTERION_BGS2)
+    init_module_bgs2();
+#elif defined(MBED_CONF_GEMALTO_CINTERION_EMS31)
+    init_module_ems31();
+#elif defined(MBED_CONF_GEMALTO_CINTERION_EHS5E)
+    init_module_ehs5e();
+#else
+    init_module_tx62();
+#endif
 }
 
 AT_CellularContext *GEMALTO_CINTERION::create_context_impl(ATHandler &at, const char *apn, bool cp_req, bool nonip_req)
@@ -60,35 +71,7 @@ nsapi_error_t GEMALTO_CINTERION::init()
     if (err != NSAPI_ERROR_OK) {
         return err;
     }
-
-    CellularInformation *information = open_information();
-    if (!information) {
-        return NSAPI_ERROR_NO_MEMORY;
-    }
-    char model[sizeof("EHS5-E") + 1]; // sizeof need to be long enough to hold just the model text
-    nsapi_error_t ret = information->get_model(model, sizeof(model));
-    close_information();
-    if (ret != NSAPI_ERROR_OK) {
-        tr_error("Cellular model not found!");
-        return NSAPI_ERROR_DEVICE_ERROR;
-    }
-    if (memcmp(model, "ELS61", sizeof("ELS61") - 1) == 0) {
-        init_module_els61();
-    } else if (memcmp(model, "BGS2", sizeof("BGS2") - 1) == 0) {
-        init_module_bgs2();
-    } else if (memcmp(model, "EMS31", sizeof("EMS31") - 1) == 0) {
-        init_module_ems31();
-    } else if (memcmp(model, "EHS5-E", sizeof("EHS5-E") - 1) == 0) {
-        init_module_ehs5e();
-    } else if (memcmp(model, "TX62", sizeof("TX62") - 1) == 0) {
-        init_module_tx62();
-    } else {
-        tr_error("Cinterion model unsupported %s", model);
-        return NSAPI_ERROR_UNSUPPORTED;
-    }
-    tr_info("Cinterion model %s (%d)", model, _module);
     set_at_urcs();
-
     return NSAPI_ERROR_OK;
 }
 
