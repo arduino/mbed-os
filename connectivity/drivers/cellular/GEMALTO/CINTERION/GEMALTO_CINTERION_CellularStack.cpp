@@ -224,6 +224,23 @@ void GEMALTO_CINTERION_CellularStack::PSMDisable() {
     }
 }
 
+int GEMALTO_CINTERION_CellularStack::ping(const char *host, int ttl)
+{
+    MBED_ASSERT(host);
+
+    _at.lock();
+    _at.set_at_timeout(ttl + 1000);
+    _at.cmd_start_stop("^SISX", "=", "%s%d%s%d%d", "Ping", _cid, host, 1, ttl);
+    _at.resp_start("^SISX: \"Ping\",");
+    _at.skip_param(3); //pingInfoType, conProfileId, ip-address
+    int rTT = _at.read_int(); //roundTripTime
+    _at.resp_stop();
+    _at.clear_error();
+    _at.restore_at_timeout();
+    _at.unlock();
+    return rTT;
+}
+
 nsapi_error_t GEMALTO_CINTERION_CellularStack::socket_stack_init()
 {
     _at.lock();
