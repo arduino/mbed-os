@@ -598,6 +598,8 @@ sisr_retry:
     if (len == 0) {
         tr_debug("Socket %d no data", socket->id);
         _at.resp_stop();
+        _at.process_oob();
+        socket->pending_bytes = 0;
         RESTORE_URCs_AND_RETURN(NSAPI_ERROR_WOULD_BLOCK);
     }
     if (len == -1) {
