@@ -19,6 +19,7 @@
 #include "GEMALTO_CINTERION_CellularStack.h"
 #include "GEMALTO_CINTERION.h"
 #include "CellularLog.h"
+#include "platform/mbed_thread.h"
 #include "rtos.h"
 
 using namespace std::chrono_literals;
@@ -537,6 +538,8 @@ sisw_retry:
     if (_at.get_last_error() == NSAPI_ERROR_OK) {
         socket->tx_ready = false;
     }
+
+    thread_sleep_for(1);  // wait for modem to process the data;
 
     return (_at.get_last_error() == NSAPI_ERROR_OK) ? accept_len : NSAPI_ERROR_DEVICE_ERROR;
 }
