@@ -54,6 +54,7 @@ const ticker_info_t* us_ticker_get_info()
 }
 
 static const uint8_t alarm_num = 0;
+static uint64_t last_read_u64 = 0;
 
 static void us_ticker_irq_handler_internal(uint alarm_src) {
     if (alarm_num == alarm_src) {
@@ -69,30 +70,32 @@ void us_ticker_init(void)
 
 uint32_t us_ticker_read()
 {
-    return time_us_32();
+    uint64_t now_u64 = time_us_64();
+
+    core_util_critical_section_enter();
+    last_read_u64 = now_u64;
+    core_util_critical_section_exit();
+
+    return now_u64;
 }
 
-void us_ticker_set_interrupt(timestamp_t timestamp)
+void us_ticker_set_interrupt(timestamp_t timestamp_u32)
 {
     core_util_critical_section_enter();
 
-    uint64_t _timestamp = (uint64_t)timestamp;
+    uint32_t last_read_u32 = (uint32_t)last_read_u64;
+    uint64_t timestamp_u64 = (uint64_t)timestamp_u32 | (last_read_u64 & 0xFFFFFFFF00000000ULL);
 
-    if (timestamp < time_us_32()) {
-        //32 bit timestamp has been wrapped
-        //We need to provide a 64 bit timestamp able to fire the irq for this round
-        _timestamp = (((time_us_64() >> 32) + 1) << 32) + timestamp;
-    } else {
-        //Then, at the next round, wrap the 64 bit timer to follow the 32 bit one
-        if ((time_us_64() >> 32) > 0) {
-            uint64_t current_time = time_us_64();
-            uint64_t wrapped_time = current_time - 0xFFFFFFFF;
-            timer_hw->timelw = (uint32_t)wrapped_time;
-            timer_hw->timehw = 0;
-        }
+    if (timestamp_u32 < last_read_u32) {
+        timestamp_u64 += 1ULL << 32;
     }
-    absolute_time_t target = { _timestamp };
-    hardware_alarm_set_target(alarm_num, target);
+
+    absolute_time_t target = { timestamp_u64 };
+    bool missed = hardware_alarm_set_target(alarm_num, target);
+
+    if (missed) {
+        us_ticker_fire_interrupt();
+    }
 
     core_util_critical_section_exit();
 }
