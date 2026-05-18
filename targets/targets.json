@@ -3686,18 +3686,14 @@
             "QSPIF",
             "WHD",
             "4343W_FS",
-            "CYW43XXX",
-            "SE050"
+            "CYW43XXX"
         ],
         "macros_add": [
             "MBEDTLS_FS_IO",
             "MBEDTLS_SHA1_C",
             "CM4_BOOT_BY_APPLICATION",
             "QSPI_NO_SAMPLE_SHIFT",
-            "CYW43XXX_UNBUFFERED_UART",
-            "T1oI2C",
-            "T1oI2C_UM11225",
-            "FLOW_SILENT"
+            "CYW43XXX_UNBUFFERED_UART"
         ],
         "device_has_add": [
             "USBDEVICE",
