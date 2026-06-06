@@ -223,16 +223,32 @@
             "mem-size": 36560
         },
         "PORTENTA_H7": {
-            "mem-size": 16000
+            "mem-size": 16000,
+            "socket-max":8
         },
         "NICLA_VISION": {
-            "mem-size": 16000
+            "mem-size": 16000,
+            "socket-max":8
         },
         "OPTA": {
-            "mem-size": 16000
+            "mem-size": 16000,
+            "socket-max":8
         },
         "GIGA": {
-            "mem-size": 16000
+            "mem-size": 16000,
+            "socket-max":8
+        },
+        "ARDUINO_NANO33BLE": {
+            "mem-size": 3200,
+            "socket-max":8
+        },
+        "RASPBERRY_PI_PICO": {
+            "mem-size": 3200,
+            "socket-max":8
+        },
+        "NANO_RP2040_CONNECT": {
+            "mem-size": 3200,
+            "socket-max":8
         },
         "FVP_MPS2_M3": {
             "mem-size": 36560
